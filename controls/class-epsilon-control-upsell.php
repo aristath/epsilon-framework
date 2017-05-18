@@ -101,7 +101,6 @@ if ( class_exists( 'WP_Customize_Control' ) ):
 		 *
 		 */
 		public function content_template() { //@formatter:off ?>
-
             <# if ( data.allowed ) { #>
             <div class="epsilon-upsell">
                 <# if ( data.options ) { #>
@@ -113,7 +112,7 @@ if ( class_exists( 'WP_Customize_Control' ) ):
                                     <span class="mte-tooltip">{{ option.help }}</span>
                                 </i>
                             </li>
-                            <# }) #>
+                        <# }) #>
                     </ul>
                 <# } #>
 

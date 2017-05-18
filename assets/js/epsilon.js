@@ -10,33 +10,38 @@
 
 	EpsilonFramework.rangeSliders = function (selector) {
 		var context = $(selector),
-				slider = context.find('.ss-slider'),
-				input = context.find('.rl-slider'),
-				input_id = input.attr('id'),
-				id = slider.attr('id'),
-				min = $('#' + id).attr('data-attr-min'),
-				max = $('#' + id).attr('data-attr-max'),
-				step = $('#' + id).attr('data-attr-step');
+				sliders = context.find('.slider-container'),
+				slider, input, input_id, id, min, max, step;
 
-		$('#' + id).slider({
-			value: $('#' + input_id).attr('value'),
-			range: 'min',
-			min  : parseFloat(min),
-			max  : parseFloat(max),
-			step : parseFloat(step),
-			slide: function (event, ui) {
-				$('#' + input_id).attr('value', ui.value).change();
-			}
-		});
+		$.each(sliders, function () {
+			var slider = $(this).find('.ss-slider'),
+					input = $(this).find('.rl-slider'),
+					input_id = input.attr('id'),
+					id = slider.attr('id'),
+					min = $('#' + id).attr('data-attr-min'),
+					max = $('#' + id).attr('data-attr-max'),
+					step = $('#' + id).attr('data-attr-step');
 
-		$(input).on('focus', function () {
-			$(this).blur();
-		});
-
-		$('#' + input_id).attr('value', ($('#' + id).slider("value")));
-		$('#' + input_id).change(function () {
 			$('#' + id).slider({
-				value: $(this).val()
+				value: $('#' + input_id).attr('value'),
+				range: 'min',
+				min  : parseFloat(min),
+				max  : parseFloat(max),
+				step : parseFloat(step),
+				slide: function (event, ui) {
+					$('#' + input_id).attr('value', ui.value).change();
+				}
+			});
+
+			$(input).on('focus', function () {
+				$(this).blur();
+			});
+
+			$('#' + input_id).attr('value', ($('#' + id).slider("value")));
+			$('#' + input_id).change(function () {
+				$('#' + id).slider({
+					value: $(this).val()
+				});
 			});
 		});
 	};
@@ -628,6 +633,382 @@
 		});
 	};
 
+	EpsilonFramework.repeaterSection = {
+		data   : _epsilonSections || {},
+		api    : wp.customize || null,
+		context: null,
+
+		init: function (context) {
+			/**
+			 * Create a context for the panel
+			 */
+			this.context = context;
+			/**
+			 * Handle epsilon focus on reload
+			 */
+			this.handleEpsilonFocus();
+			/**
+			 * Handle the click event
+			 */
+			this.handleAddButton();
+			/**
+			 * Initiate the adding of a new section functionality
+			 */
+			this.addNewSection();
+		},
+
+		/**
+		 * On page reload, check the parameters and focus the section
+		 */
+		handleEpsilonFocus: function () {
+			var epsilonFocus = this.getCookie('epsilon_focus'),
+					api = wp.customize;
+
+			if ( epsilonFocus !== '' ) {
+				/**
+				 * Focus section now
+				 */
+				api[ 'panel' ](epsilonFocus, function (instance) {
+					instance.deferred.embedded.done(function () {
+						api.previewer.deferred.active.done(function () {
+							instance.focus();
+							document.cookie = 'epsilon_focus=; -1';
+						});
+					});
+				});
+			}
+		},
+
+		/**
+		 * Handle the adding section button
+		 *
+		 * @private
+		 */
+		handleAddButton: function () {
+			var panel = this.context;
+
+			panel.container.find('.add-new-section').on('click keydown', function (e) {
+				var isAddNewBtn = $(e.target).is('.add-new-section'),
+						body = $('body');
+
+				body.toggleClass('adding-section');
+				if ( body.hasClass('adding-section') && !isAddNewBtn ) {
+					panel.close();
+				}
+			});
+		},
+
+		/**
+		 * Add new settings
+		 *
+		 * @param sectionId
+		 * @param index
+		 * @private
+		 */
+		_addNewSetting: function (sectionId, index) {
+			var constructor,
+					settingSectionId,
+					setting,
+					api = wp.customize;
+			/**
+			 * Create the customizer settings
+			 */
+			_.each(_epsilonSections.settings[ sectionId ], function (data, id) {
+				settingSectionId = 'epsilon_sections[' + index + '][' + id + ']';
+				constructor = api.settingConstructor[ data.type ] || api.Setting;
+
+				if ( data.value === 'epsilon-identifier-hidden-input' ) {
+					data.value = sectionId + index;
+				}
+
+				setting = new constructor(settingSectionId, data.value, {
+					transport: data.transport,
+					previewer: api.previewer,
+					dirty    : !!data.dirty
+				});
+
+				api.add(settingSectionId, setting);
+				console.log('setting added ' + settingSectionId);
+			});
+
+		},
+
+		/**
+		 * Add new controls
+		 *
+		 * @param sectionId
+		 * @param contentSectionId
+		 * @param index
+		 * @private
+		 */
+		_addNewControls: function (sectionId, contentSectionId, index) {
+			var constructor,
+					controlSectionId,
+					templateId,
+					template,
+					controller,
+					control,
+					api = wp.customize;
+
+			/**
+			 * Create the customizer controls
+			 */
+			_.each(_epsilonSections.controls[ sectionId ], function (data, id) {
+				controlSectionId = 'epsilon_sections[' + index + '][' + id + ']';
+				data.section = contentSectionId;
+				templateId = 'customize-control-' + data.type + '-content';
+				template = wp.template('customize-control-default-content');
+
+				if ( $('#tmpl-' + templateId).length > 0 ) {
+					template = wp.template(templateId);
+				}
+
+				controller = {
+					type       : data.type,
+					label      : data.label,
+					description: data.description,
+					value      : '',
+					id         : controlSectionId,
+					class      : 'customize-control customize-control-' + data.type
+				};
+
+				if ( data.type === 'hidden' ) {
+					data.value = sectionId + index;
+					controller.value = sectionId + index;
+				}
+
+				data.content = template(controller);
+				constructor = api.controlConstructor[ data.type ] || api.Control;
+
+				control = new constructor(controlSectionId, {
+					params   : data,
+					previewer: api.previewer
+				});
+
+				api.control.add(controlSectionId, control);
+				console.log('control added ' + controlSectionId + ' to ' + contentSectionId);
+			});
+		},
+
+		/**
+		 * Add a new section
+		 * @param sectionId
+		 * @param contentSectionId
+		 * @private
+		 */
+		_addNewSection: function (sectionId, contentSectionId) {
+			var sectionData,
+					constructor,
+					api = wp.customize;
+			/**
+			 * Create customizer section
+			 */
+			sectionData = _epsilonSections.sections[ sectionId ];
+			sectionData.id = contentSectionId;
+
+			constructor = api.sectionConstructor[ sectionData.type ] || api.Section;
+			var section = new constructor(contentSectionId, {
+				params: sectionData
+			});
+
+			api.section.add(contentSectionId, section);
+			console.log('section added ' + contentSectionId);
+		},
+		/**
+		 * Add new section initiator on click event
+		 *
+		 * @private
+		 */
+
+		addNewSection : function () {
+			var panel = this;
+			$('.epsilon-section').click(function () {
+				/**
+				 * Grab the section id from the data attribute, so we know which template we need to render
+				 */
+				var sectionId = $(this).data('id'),
+						/**
+						 * Grab the index
+						 */
+						index = parseInt(_epsilonSections.total),
+						/**
+						 * Get the content section id
+						 * @type {string}
+						 */
+						contentSectionId = sectionId + '_' + index,
+						/**
+						 * Get an instance of the api
+						 */
+						api = wp.customize;
+
+				$('.section-control-remove').hide();
+				/**
+				 * Run proxies
+				 * Add a new section
+				 * Add new settings
+				 * Add new controls -> bind them to the new settings and output it in the section
+				 */
+				panel._addNewSection(sectionId, contentSectionId);
+				panel._addNewSetting(sectionId, index);
+				panel._addNewControls(sectionId, contentSectionId, index);
+
+				/**
+				 * Increment index ( while outputting the controls through PHP,
+				 * this is updated by a count() function, in real-time,
+				 * we need to increment it manually)
+				 */
+				_epsilonSections.total = parseInt(index) + 1;
+
+				/**
+				 * Close the 'add new section sidebar'
+				 */
+				$('body').removeClass('adding-section');
+
+				/**
+				 * Focus section now
+				 */
+				api[ 'section' ](contentSectionId, function (instance) {
+					instance.deferred.embedded.done(function () {
+						api.previewer.deferred.active.done(function () {
+							instance.focus();
+						});
+					});
+				});
+
+				/**
+				 * Wait for the control to be ready
+				 */
+				api[ 'control' ]('epsilon_sections', function (instance) {
+					instance.deferred.embedded.done(function () {
+						api.previewer.deferred.active.done(function () {
+							var currentSections = api.control('epsilon_sections').setting();
+							/**
+							 * FIRST CASE
+							 * There is no option
+							 */
+							if ( typeof(currentSections) === 'string' && currentSections === '' ) {
+								currentSections = [];
+								/**
+								 * SECOND CASE
+								 * The options were already saved, we take values from DATABASE
+								 */
+							} else {
+								currentSections = currentSections.slice();
+							}
+
+							currentSections.push('[' + index + ']');
+
+							api.control('epsilon_sections').setting(currentSections);
+						});
+					});
+				});
+
+				api.bind('saved', function (request) {
+					if ( typeof(request.setting_validities.epsilon_sections) !== 'undefined' && request.setting_validities.epsilon_sections ) {
+						document.cookie = 'epsilon_focus=epsilon_panel_sections';
+						location.reload();
+					}
+				});
+			});
+		},
+
+		/**
+		 * Delete section functionality
+		 */
+		deleteSection: function (context) {
+			var control = context,
+					api = wp.customize,
+					removeBtn = control.container.find('a.section-control-remove');
+
+			removeBtn.on('click', function (e) {
+				var input = $.parseJSON($(this).siblings('input').val());
+				var sectionId = input.type,
+						index = input.index;
+
+				// Collapse current section
+				var sectionIndex = control.section();
+				api.section(sectionIndex).collapse();
+
+				/**
+				 * Wait for the control to be ready
+				 */
+				api[ 'control' ]('epsilon_sections', function (instance) {
+					instance.deferred.embedded.done(function () {
+						api.previewer.deferred.active.done(function () {
+							// Remove current section from options
+							var currentSections = api.control('epsilon_sections').setting();
+							if ( typeof(currentSections) === 'object' ) {
+								currentSections = EpsilonFramework.repeaterSection.changeToArray(currentSections);
+							}
+
+							/**
+							 * If we have an index, let's splice it and remove the element
+							 */
+							if ( index > -1 ) {
+								currentSections.splice(index, 1);
+							}
+
+							/**
+							 * Deactivate current setting
+							 */
+							api.section(sectionIndex).deactivate();
+							api.section.remove(sectionIndex);
+
+							$('.add-new-section').prop('disabled', true);
+
+							/**
+							 * Add the setting
+							 */
+							api.control('epsilon_sections').setting(currentSections);
+						});
+					});
+				});
+
+				api.bind('saved', function (request) {
+					if ( typeof(request.setting_validities.epsilon_sections) !== 'undefined' && request.setting_validities.epsilon_sections ) {
+						document.cookie = 'epsilon_focus=epsilon_panel_sections';
+						location.reload();
+					}
+				});
+			});
+		},
+
+		/**
+		 * Helper function
+		 *
+		 * @param obj
+		 * @returns {Array}
+		 */
+		changeToArray: function (obj) {
+			return Object.keys(obj).map(function (key) {
+				return obj[ key ];
+			});
+		},
+
+		/**
+		 * Helper function to get Parameter by name
+		 * @param name
+		 * @param url
+		 * @returns {*}
+		 */
+		getCookie: function (name) {
+			var name = name + "=",
+					decodedCookie = decodeURIComponent(document.cookie),
+					ca = decodedCookie.split(';');
+
+			for ( var i = 0; i < ca.length; i++ ) {
+				var c = ca[ i ];
+				while ( c.charAt(0) === ' ' ) {
+					c = c.substring(1);
+				}
+				if ( c.indexOf(name) === 0 ) {
+					return c.substring(name.length, c.length);
+				}
+			}
+			return '';
+		}
+	};
+
 	/**
 	 * Load the range sliders for the widget updates
 	 */
@@ -658,6 +1039,38 @@
 				},
 				isContextuallyActive: function () {
 					return true;
+				}
+			});
+
+			wp.customize.panelConstructor[ 'epsilon-section-repeater' ] = wp.customize.Panel.extend({
+				ready: function () {
+					EpsilonFramework.repeaterSection.init(this);
+				},
+
+				close: function () {
+					$('body').removeClass('adding-section');
+				},
+
+				isContextuallyActive: function () {
+					return true;
+				}
+			});
+
+			wp.customize.controlConstructor[ 'epsilon-section-area' ] = wp.customize.Control.extend({
+				ready: function () {
+
+				}
+			});
+
+			wp.customize.controlConstructor[ 'epsilon-section-delete' ] = wp.customize.Control.extend({
+				ready: function () {
+					EpsilonFramework.repeaterSection.deleteSection(this);
+				}
+			});
+
+			wp.customize.controlConstructor[ 'epsilon-toggle' ] = wp.customize.Control.extend({
+				ready: function () {
+
 				}
 			});
 		}

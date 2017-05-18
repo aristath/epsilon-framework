@@ -178,7 +178,7 @@ ul.epsilon-upsell-requirements {
     font-style: italic;
 }
 
-.epsilon-button-group a{
+.epsilon-button-group a {
 
 }
 
@@ -504,17 +504,17 @@ textarea.epsilon-typography-input {
 }
 
 .control-section-epsilon-section-pro .accordion-section-title .button {
-    margin-top:  -4px;
+    margin-top: -4px;
     font-weight: 400;
     margin-left: 8px;
 }
 
 .rtl .control-section-epsilon-section-pro .accordion-section-title .button {
-    margin-left:  0;
+    margin-left: 0;
     margin-right: 8px;
 }
 
-.epsilon-full-section-button{
+.epsilon-full-section-button {
     width: 100%;
     z-index: 1;
     position: absolute;
@@ -541,19 +541,21 @@ div.recommended-actions_container {
     padding: 0 10px;
     margin-bottom: 2em;
 }
-.epsilon-recommended-actions{
+
+.epsilon-recommended-actions {
     position: relative;
 }
-.epsilon-recommended-plugins{
+
+.epsilon-recommended-plugins {
     position: relative;
 }
 
 .epsilon-recommended-actions .epsilon-dismiss-required-action,
-.epsilon-recommended-plugins .epsilon-recommended-plugin-button{
+.epsilon-recommended-plugins .epsilon-recommended-plugin-button {
     position: absolute;
-    bottom:5px;
-    right:5px;
-    cursor:pointer;
+    bottom: 5px;
+    right: 5px;
+    cursor: pointer;
 }
 
 .epsilon-recommended-plugins p.title,
@@ -564,60 +566,254 @@ div.recommended-actions_container {
     font-weight: 600;
     padding-right: 20px;
 }
+
 .epsilon-recommended-plugins div.description,
 .epsilon-recommended-actions div.description {
     font-size: 12px;
 }
+
 .epsilon-recommended-plugins .custom-plugin,
 .epsilon-recommended-actions .custom-action {
     border-top: 1px solid #fafafa;
     margin-top: 1em;
     padding-top: 1em;
 }
+
 .epsilon-recommended-plugins .custom-plugin p,
 .epsilon-recommended-actions .custom-action p {
     margin-top: 0;
 }
+
 .recommended-actions_container .epsilon-recommended-actions-container:not(:first-child) {
     opacity: 0;
     height: 0;
     overflow: hidden;
 }
+
 .recommended-actions_container .epsilon-recommended-actions-container:first-child {
     height: auto;
     opacity: 1;
 }
+
 .recommended-actions_container .epsilon-recommended-actions-container {
     -webkit-transition: opacity 2s; /* Safari */
     transition: opacity 2s;
 }
+
 .recommended-actions_container .hide {
     display: none;
 }
+
 .epsilon-actions-count.complete {
     background-color: #79ba49;
 }
+
 .recommended-actions_container #demo_content .button {
     display: block;
     margin-bottom: 1em;
     text-align: center;
 }
+
 .recommended-actions_container .succes a {
     width: 100%;
     text-align: center;
     display: inline-block;
 }
+
 .recommended-actions_container .succes a.social {
     width: 49%;
     margin-bottom: 1em;
     line-height: 20px;
     padding-top: 4px;
 }
+
 .recommended-actions_container .succes a.social span,
 .recommended-actions_container .succes a.epsilon-wordpress span {
     margin-right: 5px;
 }
+
 .recommended-actions_container .succes a.epsilon-wordpress {
     line-height: 20px;
     padding-top: 4px;
+}
+
+/**
+Add sections
+ */
+body.adding-section #available-sections {
+    left: 0;
+    visibility: visible;
+}
+
+body.adding-section .wp-full-overlay-main {
+    left: 300px;
+}
+
+body.adding-section #customize-preview {
+    opacity: 0.4;
+}
+
+#available-sections {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -301px;
+    visibility: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 300px;
+    margin: 0;
+    z-index: 4;
+    background: #eee;
+    -webkit-transition: left .18s;
+    transition: left .18s;
+    border-right: 1px solid #ddd;
+    padding-top: 60px;
+}
+
+.add-new-section:before {
+    content: "\f132";
+    display: inline-block;
+    position: relative;
+    left: -2px;
+    top: -1px;
+    font: 400 20px/1 dashicons;
+    vertical-align: middle;
+    -webkit-transition: all .2s;
+    transition: all .2s;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.adding-section .add-new-section:before {
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+#available-sections-filter {
+    position: fixed;
+    top: 0;
+    z-index: 1;
+    width: 300px;
+    background: #eee;
+    padding: 13px 15px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#available-sections-filter h2 {
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+#available-sections .customize-section-title {
+    display: none;
+}
+
+#available-sections-filter input {
+    width: 100%;
+    height: 32px;
+    margin: 1px 0;
+    padding: 6px 30px;
+}
+
+#available-sections-filter .search-icon {
+    display: block;
+    position: absolute;
+    top: 15px;
+    left: 16px;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    color: #72777c;
+}
+
+#available-sections-filter .search-icon:after {
+    content: "\f179";
+    font: 400 20px/1 dashicons;
+    vertical-align: middle;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#available-sections-filter .clear-results {
+    position: absolute;
+    top: 15px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: 0 0;
+    color: #a00;
+    text-decoration: none;
+    outline: 0;
+}
+
+.epsilon-section-not-found,
+.epsilon-panel-actions {
+    padding: 12px;
+}
+
+.epsilon-section-not-found p {
+    margin: 0;
+}
+
+.epsilon-panel-actions {
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#customize-theme-controls .control-panel-opc_panel.current-panel {
+    padding-bottom: 60px;
+}
+
+/*#available-sections-list {
+    padding: 0 15px;
+}*/
+#available-sections-list .epsilon-section {
+    padding: 20px 15px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    border-left: 4px solid #fff;
+    -webkit-transition: .15s color ease-in-out, .15s background-color ease-in-out, .15s border-color ease-in-out;
+    transition: .15s color ease-in-out, .15s background-color ease-in-out, .15s border-color ease-in-out;
+}
+
+#available-sections-list .epsilon-section:hover {
+    background: #f3f3f5;
+    border-bottom-color: #ccc;
+    color: #0073aa;
+    border-left-color: #0073aa;
+}
+
+#available-sections-list .epsilon-section .epsilon-section-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+    padding-bottom: 5px;
+}
+
+#available-sections-list .epsilon-section .epsilon-section-description {
+    display: block;
+}
+
+.epsilon-add-section-buttons {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.customize-control.customize-control-hidden {
+    display: none !important;
 }

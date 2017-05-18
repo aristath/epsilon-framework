@@ -21,6 +21,17 @@ if ( class_exists( 'WP_Customize_Control' ) ) {
 		 */
 		public $type = 'epsilon-toggle';
 
+		public function __construct( WP_Customize_Manager $manager, $id, array $args = array() ) {
+			parent::__construct( $manager, $id, $args );
+			$manager->register_control_type( 'Epsilon_Control_Toggle' );
+		}
+
+		public function json() {
+			$json = parent::json();
+
+			return $json;
+		}
+
 		/**
 		 * Displays the control content.
 		 *
@@ -32,8 +43,9 @@ if ( class_exists( 'WP_Customize_Control' ) ) {
 			?>
             <div class="checkbox_switch">
 				<span class="customize-control-title onoffswitch_label"><?php echo esc_html( $this->label ); ?>
-					<?php if ( !empty($this->description) ): ?>
-                    <i class="dashicons dashicons-editor-help" style="vertical-align: text-bottom; position: relative;">
+					<?php if ( ! empty( $this->description ) ): ?>
+                        <i class="dashicons dashicons-editor-help"
+                           style="vertical-align: text-bottom; position: relative;">
 						<span class="mte-tooltip"><?php echo wp_kses_post( $this->description ); ?></span>
 					</i>
 					<?php endif; ?>
@@ -47,6 +59,10 @@ if ( class_exists( 'WP_Customize_Control' ) ) {
                 </div>
             </div>
 			<?php
+		}
+
+		public function content_template() { //@formatter:off ?>
+        <?php //@formatter:on
 		}
 	}
 }
